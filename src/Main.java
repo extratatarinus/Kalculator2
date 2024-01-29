@@ -1,9 +1,10 @@
 
+import java.io.IOException;
 import java.util.Scanner;
 
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException, ScannerException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Введите числа не больше 10 (в т.ч. римские) и операцию, необходимую между ними выполнить\n" +
                 "Пример: 1 + 2\nАрифметические операции, которые поддерживает приложение:\n" +
@@ -27,20 +28,16 @@ public class Main {
 
         if (isNumeric(a)) {
             if (isNumeric(b)) {
-                try {
+                if (isInteger(x) && isInteger(y) == false) {
+                    throw new ScannerException("Можно использовать только целые числа!");
+                }
                     x = Integer.parseInt(a);
                     y = Integer.parseInt(b);
-                }catch (IllegalArgumentException e) {
-                    System.out.print("Можно использовать только целые числа!");
-                    System.exit(0);
-                }
             } else {
-                System.out.print("Формат математической операции не удовлетворяет заданию - два операнда и один оператор (+, -, /, *)");
-                System.exit(0);
+                throw new ScannerException("Формат математической операции не удовлетворяет заданию - два операнда и один оператор (+, -, /, *)");
             }
         } else if (isNumeric(b)) {
-            System.out.print("Формат математической операции не удовлетворяет заданию - два операнда и один оператор (+, -, /, *)");
-            System.exit(0);
+            throw new ScannerException("Формат математической операции не удовлетворяет заданию - два операнда и один оператор (+, -, /, *)");
         } else {
             isRim = true;
             x = RimToInt(a);
@@ -49,8 +46,7 @@ public class Main {
         boolean valueIsGreaterTen = false;
         valueIsGreaterTen = y > 10 || x > 10;
         if (valueIsGreaterTen) {
-            System.out.print("Вводимые значения не могут быть больше 10");
-            System.exit(0);
+            throw new ScannerException("Вводимые значения не могут быть больше 10");
         }
 
         switch (operaiton){
@@ -82,17 +78,16 @@ public class Main {
                 res = x - y;
                 if (isRim) {
                     int ires = (int) res;
-                    try {
-                        Rim RimResm = Rim.valueOf(ires);
-                        if (RimResm != null) {
-                            System.out.println("Результат:" + RimResm);
-                            ;
-                        } else {
-                            System.out.print("в римской системе нет отрицательных чисел");
-                        }
-                    } catch (IllegalArgumentException e) {
-                        System.out.print("в римской системе нет отрицательных чисел");
+                    if (ires < 0) {
+                        throw new ScannerException("в римской системе нет отрицательных чисел");
                     }
+                    Rim RimResm = Rim.valueOf(ires);
+                        if (RimResm != null){
+                        System.out.println("Результат:" + RimResm);
+                        } else {
+                            throw new ScannerException("в римской системе нет отрицательных чисел");
+                        }
+
                 }else {
                     int ires = (int) res;
                     System.out.println("Результат:" + ires);
@@ -110,18 +105,18 @@ public class Main {
                 }
                 break;
             default:
-                System.out.print("Неверно введённая математическая операция\n" +
+                throw new ScannerException("Неверно введённая математическая операция\n" +
                         "Приложение поддерживает : + - сложение, - - вычитание, / - деление, * - умножение");
-                System.exit(0);
-                break;
 
         }
 
     }
+    private static boolean isInteger(double number) {
+        return Math.floor(number) == number;
+    }
 
 
-
-        static int RimToInt (String RimValue){
+        static int RimToInt (String RimValue) throws ScannerException {
             Rim myValue;
             int value = 0;
 
@@ -131,20 +126,19 @@ public class Main {
                     if (myValue != null) {
                         value = myValue.getValue();
                     } else {
-                        System.out.print("Некорректно введены римские цифры\n" +
+                        throw new ScannerException("Некорректно введены римские цифры\n" +
                                 "Пример: I, II, III, IV, V, VI, VII, VIII, IX, X (не больше 10)");
-                        System.exit(0);
                     }
                 } catch (IllegalArgumentException e) {
-                    System.out.print("Некорректно введены римские цифры\n" +
+                    throw new ScannerException("Некорректно введены римские цифры\n" +
                             "Пример: I, II, III, IV, V, VI, VII, VIII, IX, X (не больше 10)");
-                    System.exit(0);
+                } catch (ScannerException e) {
+                    throw new RuntimeException(e);
                 }
             }
             if (value > 10) {
-                System.out.print("Вводимые значения не могут быть больше 10\n" +
+                throw new ScannerException("Вводимые значения не могут быть больше 10\n" +
                         "Пример: I, II, III, IV, V, VI, VII, VIII, IX, X (не больше 10)");
-                System.exit(0);
             }
             return value;
         }
